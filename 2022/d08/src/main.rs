@@ -65,6 +65,46 @@ fn part_1() {
     println!("{}", seen.len() + ntree_border);
 }
 
+fn part_2() {
+    let input = include_bytes!("../input");
+    let grid: Vec<_> = input.split(|b| b == &b'\n').collect();
+
+    let mut max_scenic_score = 0;
+    for i in 0..grid.len() {
+        for j in 0..grid.len() {
+            let left_to_center = (1..j)
+                .map(|index| grid[j - index][i])
+                .position(|height| height >= grid[j][i])
+                .unwrap_or_else(|| j.wrapping_sub(1))
+                .wrapping_add(1);
+
+            let center_to_right = (j + 1..grid.len())
+                .map(|index| grid[index][i])
+                .position(|height| height >= grid[j][i])
+                .unwrap_or_else(|| (grid.len()-j).wrapping_sub(2))
+                .wrapping_add(1);
+
+            let top_to_center = (1..i)
+                .map(|index| grid[j][i - index])
+                .position(|height| height >= grid[j][i])
+                .unwrap_or_else(|| i.wrapping_sub(1))
+                .wrapping_add(1);
+
+            let center_to_bottom = (i + 1..grid.len())
+                .map(|index| grid[j][index])
+                .position(|height| height >= grid[j][i])
+                .unwrap_or_else(|| (grid.len()-i).wrapping_sub(2))
+                .wrapping_add(1);
+
+            max_scenic_score = max_scenic_score
+                .max(left_to_center * center_to_right * top_to_center * center_to_bottom);
+        }
+    }
+
+    println!("{}", max_scenic_score);
+}
+
 fn main() {
     part_1();
+    part_2();
 }
