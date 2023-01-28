@@ -84,7 +84,6 @@ fn part_1() {
     (start, end) = (start - start / (width + 1), end - end / (width + 1));
     (height_map[start], height_map[end]) = (0, 25);
 
-    // let mut height_map: Vec<Vec<_>> = height_map.chunks(width).map(|x| x.to_vec()).collect();
     let min_distance = dijkstra(&height_map, start, end, width, height);
 
     println!("{}", min_distance);
