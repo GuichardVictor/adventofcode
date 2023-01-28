@@ -1,4 +1,7 @@
-use std::{collections::{BinaryHeap, HashSet}, cmp::Ordering};
+use std::{
+    cmp::Ordering,
+    collections::{BinaryHeap, HashSet},
+};
 
 #[derive(Eq, PartialEq)]
 struct State {
@@ -8,8 +11,10 @@ struct State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.cost.cmp(&self.cost)
-        .then_with(|| self.position.cmp(&other.position))
+        other
+            .cost
+            .cmp(&self.cost)
+            .then_with(|| self.position.cmp(&other.position))
     }
 }
 
@@ -19,14 +24,22 @@ impl PartialOrd for State {
     }
 }
 
-fn dijkstra(graph: &Vec<u8>, source: usize, destination: usize, width: usize, height: usize) -> usize {
+fn dijkstra(
+    graph: &Vec<u8>,
+    source: usize,
+    destination: usize,
+    width: usize,
+    height: usize,
+) -> usize {
     let mut priority_queue: BinaryHeap<State> = BinaryHeap::default();
-    priority_queue.push(State {cost: 0,  position: source});
+    priority_queue.push(State {
+        cost: 0,
+        position: source,
+    });
 
     let mut seen: HashSet<usize> = HashSet::default();
 
-    while let Some(State {cost, position}) = priority_queue.pop() {
-        
+    while let Some(State { cost, position }) = priority_queue.pop() {
         if position == destination {
             return cost;
         }
@@ -58,12 +71,14 @@ fn dijkstra(graph: &Vec<u8>, source: usize, destination: usize, width: usize, he
                 continue;
             }
 
-            priority_queue.push(State {cost: cost + 1, position: new_1d_pos});
+            priority_queue.push(State {
+                cost: cost + 1,
+                position: new_1d_pos,
+            });
         }
     }
 
     return 0;
-
 }
 
 fn part_1() {
@@ -78,7 +93,7 @@ fn part_1() {
     let height = height_map.len() / width;
 
     let mut start = input.bytes().position(|b| b == b'S').unwrap();
-    let mut end = input.bytes().position(|b| b== b'E').unwrap();
+    let mut end = input.bytes().position(|b| b == b'E').unwrap();
 
     // Change coordinate to height map coordinate and update values:
     (start, end) = (start - start / (width + 1), end - end / (width + 1));
@@ -89,6 +104,40 @@ fn part_1() {
     println!("{}", min_distance);
 }
 
+fn part_2() {
+    let input = include_str!("../input");
+    let mut height_map: Vec<_> = input
+        .bytes()
+        .filter(|b| b != &b'\n')
+        .map(|b| b.to_ascii_lowercase() - b'a')
+        .collect();
+    
+    let width = input.bytes().position(|b| b == b'\n').unwrap();
+    let height = height_map.len() / width;
+
+    let mut start = input.bytes().position(|b| b == b'S').unwrap();
+    let mut end = input.bytes().position(|b| b == b'E').unwrap();
+
+    // Change coordinate to height map coordinate and update values:
+    (start, end) = (start - start / (width + 1), end - end / (width + 1));
+    (height_map[start], height_map[end]) = (0, 25);
+
+    let distances = height_map
+        .iter()
+        .enumerate()
+        .filter(|(_, h)| **h == 0)
+        .filter_map(|(pos, _)| {
+            let distance = dijkstra(&height_map, pos, end, width, height);
+            match distance {
+                0 => None,
+                v => Some(v)
+            }
+        });
+
+    println!("{}", distances.min().unwrap());
+}
+
 fn main() {
     part_1();
+    part_2();
 }
